@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-M4P3TQX3T2"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+
+      gtag('config', 'G-M4P3TQX3T2');
+    </script>
+    <title>Border Tools</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lil-gui@0.17"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-container">
+            <a href="index.html" class="type-link">Border</a>
+            <div class="dropdown">
+                <select onchange="if (this.value) window.location.href=this.value">
+                    <option value="" selected disabled>Tools</option>
+                    <option value="" disabled>─────────</option>
+                    <option value="circles/circles.html">Circles</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <p id="randomText" data-desktop="A web-based border generator." data-mobile="Please open border-tools.co on desktop."></p>
+    <p style="position: fixed; bottom: 10px; left: 2px; right: 20px; font-size: 14px; color: inherit; opacity: 0.4; z-index: 1; user-select: none; -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none;">
+        Created by <a href="https://reedhollett.online/" target="_blank" style="color: inherit; text-decoration: underline; transition: opacity 0.2s; opacity: 1;" onmouseover="this.style.opacity='0.5'" onmouseout="this.style.opacity='1'">Reed Hollett</a>
+    </p>
+    <script src="fallingOvals.js"></script>
+    <script src="themeSwitch.js"></script>
+    <script>
+        function isMobileDevice() {
+            return (window.innerWidth <= 768) || 
+                   ('ontouchstart' in window) ||
+                   (navigator.maxTouchPoints > 0) ||
+                   (navigator.msMaxTouchPoints > 0);
+        }
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const randomText = document.getElementById('randomText');
+            if (isMobileDevice()) {
+                randomText.textContent = randomText.dataset.mobile;
+            } else {
+                randomText.textContent = randomText.dataset.desktop;
+            }
+        });
+    </script>
+</body>
+</html>

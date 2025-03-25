@@ -1,0 +1,544 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    background-color: #FFFFFF;
+    color: #333333;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+body.dark-theme {
+    background-color: #121212 !important;
+    color: #FFFFFF !important;
+}
+
+body.light-theme {
+    background-color: #FFFFFF;
+    color: #333333;
+}
+
+.container {
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+}
+
+.nav-container {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+}
+
+.nav-container .type-link,
+.nav-container .dropdown select {
+    padding: 6px 12px;
+    background-color: #F0F0F0;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #595959;
+    cursor: pointer;
+}
+
+.type-link,
+.dropdown select,
+.theme-buttons button {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    padding: 10px 15px;
+    border: none;
+    background-color: transparent;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background-color 0.3s, color 0.3s;
+    text-decoration: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.type-link:hover,
+.dropdown select:hover,
+.theme-buttons button:hover {
+    background-color: var(--hover-bg-color);
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown select {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23595959' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    font-size: 16px;
+    color: #595959;
+    cursor: pointer;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    border-bottom: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.dropdown::after {
+    content: none;
+}
+
+p {
+    margin-left: 20px;
+    margin-top: 40px;
+    font-size: 80px;
+    line-height: 1.2;
+    max-width: 1300px;
+    letter-spacing: -0.02em;
+    color: #333333;
+    z-index: 1;
+    position: relative;
+}
+
+/* Styles for project pages */
+body.project-page .container {
+    padding: 20px 40px;
+}
+
+body.project-page .nav-container {
+    display: flex;
+    align-items: center;
+    padding: 20px 0 0 20px;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+body.project-page .nav-container .type-link,
+body.project-page .nav-container .dropdown {
+    margin-top: 0;
+    margin-left: 0;
+}
+
+body.project-page .nav-container .type-link {
+    margin-right: 10px;
+}
+
+body.project-page .nav-container .dropdown select {
+    padding: 6px 12px;
+}
+
+#defaultCanvas0 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 0;
+}
+
+.lil-gui {
+    position: fixed;
+    top: 20px !important;
+    right: 20px;
+    z-index: 1000;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    overflow: hidden; /* This ensures child elements don't overflow the rounded corners */
+}
+
+/* Lil-GUI Styles */
+.lil-gui {
+    --background-color: #FAFAFA;
+    --text-color: #3d3d3d;
+    --title-background-color: #f0f0f0;
+    --title-text-color: #3d3d3d;
+    --widget-color: #f0f0f0;
+    --hover-color: #f0f0f0;
+    --focus-color: #f6f6f6;
+    --number-color: #000000;
+    --string-color: #000000;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    font-weight: normal;
+    font-style: normal;
+    width: auto;
+    min-width: 300px;
+    max-width: 300px;
+    border-radius: 4px;
+}
+
+/* Add padding to the children container instead */
+.lil-gui > .children {
+    padding-top: 4px;
+    padding-bottom: 10px;
+}
+
+/* Adjust margins for first and last controllers */
+.lil-gui > .children > :first-child {
+    margin-top: 10px;
+}
+
+.lil-gui > .children > :last-child {
+    margin-bottom: 4px;
+}
+
+.lil-gui .controller:last-child {
+    margin-bottom: 4px;
+}
+
+.lil-gui .controller {
+    padding-left: 12px;  /* Match title's left padding */
+    padding-right: 12px; /* Match title's right padding */
+    border-radius: 4px;
+}
+
+.lil-gui input {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.lil-gui .slider .fill {
+    background-color: #ececec;
+}
+
+.dark-theme .lil-gui .slider .fill {
+    background-color: #303030;
+}
+
+/* More specific selectors for navigation elements on project pages */
+.project-page .nav-container .type-link,
+.project-page .nav-container .dropdown {
+    margin-top: 20px;
+    margin-left: 20px;
+}
+
+/* Extremely specific selectors for navigation elements on project pages */
+body.project-page .container .nav-container .type-link,
+body.project-page .container .nav-container .dropdown,
+body.project-page .container .nav-container .dropdown select {
+    margin-top: 20px !important;
+    margin-left: 20px !important;
+}
+
+/* Ensure these elements don't have padding that could interfere */
+body.project-page .container .nav-container .type-link,
+body.project-page .container .nav-container .dropdown select {
+    padding: 6px 12px !important;
+}
+
+.nav-container .type-link,
+.nav-container .dropdown {
+    margin-right: 10px;
+}
+
+.nav-container .type-link,
+.nav-container .dropdown select {
+    padding: 6px 12px;
+    background-color: #F0F0F0;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    color: #595959;
+    cursor: pointer;
+}
+
+.nav-container .dropdown select {
+    appearance: none;
+    padding-right: 30px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23595959' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+}
+
+/* Target the title bar for when it's minimized */
+.lil-gui > .title {
+    padding: 6px 12px;
+    background-color: #F0F0F0;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px !important;
+    color: #262626 !important;
+    cursor: pointer;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    height: 31px;
+    line-height: normal;
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    flex-direction: row-reverse;
+    justify-content: space-between;
+}
+
+body.dark-theme .lil-gui > .title {
+    color: #e0e0e0 !important;
+    background-color: #2c2c2c;
+}
+
+body.dark-theme .lil-gui > .title:hover {
+    background-color: #3a3a3a;
+    transition: background-color 0.2s ease;
+}
+
+.lil-gui > .title:hover {
+    background-color: #e0e0e0;
+    transition: background-color 0.2s ease;
+}
+
+.theme-buttons {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    gap: 10px;
+}
+
+.theme-buttons button {
+    background-color: #f0f0f0;
+    color: #595959;
+    border: 1px solid var(--text-color);
+    padding: 6px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s, color 0.3s;
+    height: 31px;
+    line-height: normal;
+}
+
+.theme-buttons button:hover {
+    background-color: #e0e0e0;
+    opacity: 0.8;  /* Slight transparency on hover */
+}
+
+.theme-buttons button.active {
+    background-color: #333333;
+    color: #FFFFFF;
+}
+
+body.dark-theme .theme-buttons button {
+    background-color: #2c2c2c;
+    color: #e0e0e0;
+}
+
+body.dark-theme .theme-buttons button:hover {
+    background-color: #3a3a3a;
+    transition: background-color 0.2s ease;
+}
+
+body.dark-theme .theme-buttons button.active {
+    background-color: #e0e0e0;
+    color: #121212;
+}
+
+body.dark-theme .nav-container .type-link,
+body.dark-theme .nav-container .dropdown select {
+    color: #e0e0e0;
+    background-color: #2c2c2c;
+}
+
+body.dark-theme .nav-container .dropdown select:hover {
+    background-color: #3a3a3a;
+    transition: background-color 0.2s ease;
+}
+
+body.dark-theme p {
+    color: #e0e0e0;
+}
+
+#randomText {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    margin: 0;
+    z-index: 1;
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+}
+
+.nav-container .type-link:hover,
+.nav-container .dropdown select:hover {
+    background-color: #e0e0e0;  /* Lighter gray for hover state */
+    transition: background-color 0.2s ease;
+}
+
+/* Dark theme hover states */
+body.dark-theme .nav-container .type-link:hover,
+body.dark-theme .nav-container .dropdown select:hover,
+body.dark-theme .theme-buttons button:hover {
+    background-color: #3a3a3a;  /* Lighter shade for dark theme */
+    transition: background-color 0.2s ease;
+}
+
+.nav-container, .theme-buttons {
+    transition: opacity 0.3s ease;
+}
+
+/* Dark theme adjustments */
+body.dark-theme .lil-gui > .title {
+    color: #e0e0e0 !important;
+    background-color: #2c2c2c;
+}
+
+body.dark-theme .lil-gui > .title > .close-button {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23FFFFFF' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");
+}
+
+/* Remove any default padding from the controller rows */
+.lil-gui .controller.row {
+    padding-right: 12px;
+}
+
+/* Ensure the name and widget parts of controllers align properly */
+.lil-gui .controller .name {
+    padding-right: 6px;
+    --name-width: 40%;
+}
+
+.lil-gui .controller .widget {
+    margin-left: auto;  /* Push to right edge */
+}
+
+.lil-gui > .title {
+    color: #595959 !important;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    p {
+        font-size: 40px;
+        margin: 40px 20px;
+        text-align: center;
+        line-height: 1.4;
+    }
+}
+
+/* Ensure mobile message is centered vertically */
+body:has(#randomText) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+    #randomText {
+        font-size: 6vw;
+        max-width: 80%;
+        text-align: center;
+        line-height: 1.4;
+        position: static;
+        margin: 0;
+    }
+}
+
+/* Remove the general body:has selector and make it mobile-specific */
+@media (max-width: 768px) {
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        padding: 20px;
+        box-sizing: border-box;
+    }
+}
+
+/* Desktop text styles */
+@media (min-width: 769px) {
+    #randomText {
+        text-align: left;
+    }
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    /* Hide ALL navigation and control elements */
+    .nav-container,
+    .theme-buttons,
+    .lil-gui,
+    .container .dropdown,
+    .type-link,
+    select,
+    button {
+        display: none !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    #randomText {
+        position: static;
+        font-size: 24px;
+        max-width: 80%;
+        text-align: center;
+        line-height: 1.4;
+        margin: 0;
+    }
+}
+
+/* Additional size adjustment for very small screens */
+@media (max-width: 320px) {
+    #randomText {
+        font-size: 20px;
+    }
+}
+
+/* Desktop text */
+#randomText {
+    position: absolute;
+    top: 80px;
+    left: 20px;
+    margin: 0;
+    z-index: 1;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 768px) {
+    /* Hide the entire container and all controls */
+    .container {
+        display: none !important;
+    }
+    
+    body {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+    }
+
+    #randomText {
+        position: static;
+        font-size: 100px;
+        max-width: 80%;
+        text-align: center;
+        line-height: 1.4;
+        margin: 0;
+    }
+}
+
+body.dark-theme .nav-container .dropdown select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Cpath fill='%23e0e0e0' d='M0 2l4 4 4-4z'/%3E%3C/svg%3E");
+    color: #e0e0e0;
+    background-color: #2c2c2c;
+}
