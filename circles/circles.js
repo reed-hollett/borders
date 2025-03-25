@@ -25,6 +25,12 @@ let foregroundColors = [
   '#3B3B3B'  // Charcoal
 ];
 
+let vintagePNG;
+
+function preload() {
+  vintagePNG = loadImage('../shapes/vintage-scroll.png');
+}
+
 let params = {
   aspectRatio: "16:9 (Widescreen)",
   flipOrientation: true,
@@ -40,11 +46,14 @@ let params = {
     'Ornate',
     'Leaves',
     'Diamonds',
-    'Scrolls'
+    'Scrolls',
+    'Repeating Shape',
+    'Vintage Border',
+    'Vintage Scroll'
   ],
   elementSize: 15,
   elementSpacing: 5,
-  borderLayers: 1, // New parameter for number of border layers
+  borderLayers: 1,
   invertColors: false,
   animate: false,
   export: function() {
@@ -72,7 +81,7 @@ function setup() {
   
   // Create canvas with the selected aspect ratio
   updateCanvasDimensions();
-  let canvas = createCanvas(canvasWidth, canvasHeight); // Remove WEBGL
+  let canvas = createCanvas(canvasWidth, canvasHeight);
   
   // Create a graphics buffer at 2x resolution for sharper rendering
   pg = createGraphics(canvasWidth * 2, canvasHeight * 2);
@@ -119,7 +128,7 @@ function setup() {
       redraw();
     });
     
-  gui.add(params, 'borderStyle', params.borderStyles)
+  const borderStyleController = gui.add(params, 'borderStyle', params.borderStyles)
     .name('Border Style')
     .onChange(() => {
       needsRedraw = true;
@@ -418,6 +427,15 @@ function drawBorderElementToBuffer(x, y, size, edge) {
     case 'Scrolls':
       drawScrollToBuffer(0, 0, size);
       break;
+    case 'Repeating Shape':
+      drawRepeatingShapeToBuffer(0, 0, size);
+      break;
+    case 'Vintage Border':
+      drawVintageBorderToBuffer(0, 0, size);
+      break;
+    case 'Vintage Scroll':
+      drawVintageScrollToBuffer(0, 0, size);
+      break;
   }
   
   pg.pop();
@@ -565,6 +583,186 @@ function drawScrollToBuffer(x, y, size) {
   pg.bezierVertex(x - size/8, y - size/6, x + size/8, y - size/6, x + size/4, y);
   pg.bezierVertex(x + size/8, y + size/6, x - size/8, y + size/6, x - size/4, y);
   pg.endShape(CLOSE);
+}
+
+function drawRepeatingShapeToBuffer(x, y, size) {
+  // Create a repeating pattern inspired by vintage designs
+  pg.noStroke();
+  
+  // Main shape - a stylized flower with repeating elements
+  const numPetals = 6;
+  const innerSize = size * 0.4;
+  const outerSize = size * 0.6;
+  
+  // Draw outer petals
+  for (let i = 0; i < numPetals; i++) {
+    pg.push();
+    pg.translate(x, y);
+    pg.rotate(i * TWO_PI / numPetals);
+    
+    // Outer petal
+    pg.beginShape();
+    pg.vertex(0, -outerSize);
+    pg.bezierVertex(
+      outerSize * 0.3, -outerSize * 0.8,
+      outerSize * 0.8, -outerSize * 0.3,
+      outerSize, 0
+    );
+    pg.bezierVertex(
+      outerSize * 0.8, outerSize * 0.3,
+      outerSize * 0.3, outerSize * 0.8,
+      0, outerSize
+    );
+    pg.bezierVertex(
+      -outerSize * 0.3, outerSize * 0.8,
+      -outerSize * 0.8, outerSize * 0.3,
+      -outerSize, 0
+    );
+    pg.bezierVertex(
+      -outerSize * 0.8, -outerSize * 0.3,
+      -outerSize * 0.3, -outerSize * 0.8,
+      0, -outerSize
+    );
+    pg.endShape(CLOSE);
+    
+    // Inner detail
+    pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+    pg.beginShape();
+    pg.vertex(0, -innerSize);
+    pg.bezierVertex(
+      innerSize * 0.3, -innerSize * 0.8,
+      innerSize * 0.8, -innerSize * 0.3,
+      innerSize, 0
+    );
+    pg.bezierVertex(
+      innerSize * 0.8, innerSize * 0.3,
+      innerSize * 0.3, innerSize * 0.8,
+      0, innerSize
+    );
+    pg.bezierVertex(
+      -innerSize * 0.3, innerSize * 0.8,
+      -innerSize * 0.8, innerSize * 0.3,
+      -innerSize, 0
+    );
+    pg.bezierVertex(
+      -innerSize * 0.8, -innerSize * 0.3,
+      -innerSize * 0.3, -innerSize * 0.8,
+      0, -innerSize
+    );
+    pg.endShape(CLOSE);
+    
+    // Center dot
+    pg.fill(params.invertColors ? params.borderColor : params.canvasColor);
+    pg.ellipse(0, 0, size * 0.2, size * 0.2);
+    
+    pg.pop();
+  }
+  
+  // Add connecting elements between petals
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  for (let i = 0; i < numPetals; i++) {
+    pg.push();
+    pg.translate(x, y);
+    pg.rotate(i * TWO_PI / numPetals + PI / numPetals);
+    
+    // Curved connector
+    pg.beginShape();
+    pg.vertex(0, -outerSize * 0.8);
+    pg.bezierVertex(
+      outerSize * 0.4, -outerSize * 0.4,
+      outerSize * 0.4, outerSize * 0.4,
+      0, outerSize * 0.8
+    );
+    pg.endShape();
+    
+    pg.pop();
+  }
+}
+
+function drawVintageBorderToBuffer(x, y, size) {
+  // Create a vintage border pattern using p5.js shapes
+  pg.noStroke();
+  
+  // Main shape - a stylized vintage border element
+  const numPoints = 8;
+  const innerSize = size * 0.4;
+  const outerSize = size * 0.6;
+  
+  // Draw outer shape
+  pg.beginShape();
+  for (let i = 0; i < numPoints; i++) {
+    const angle = (i * TWO_PI) / numPoints;
+    const radius = i % 2 === 0 ? outerSize : innerSize;
+    const px = x + cos(angle) * radius;
+    const py = y + sin(angle) * radius;
+    pg.vertex(px, py);
+  }
+  pg.endShape(CLOSE);
+  
+  // Draw inner details
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  
+  // Center circle
+  pg.ellipse(x, y, size * 0.3, size * 0.3);
+  
+  // Decorative elements
+  for (let i = 0; i < numPoints; i++) {
+    const angle = (i * TWO_PI) / numPoints;
+    const radius = size * 0.5;
+    const px = x + cos(angle) * radius;
+    const py = y + sin(angle) * radius;
+    
+    // Draw small circles at each point
+    pg.ellipse(px, py, size * 0.15, size * 0.15);
+    
+    // Draw connecting lines
+    if (i > 0) {
+      const prevAngle = ((i - 1) * TWO_PI) / numPoints;
+      const prevX = x + cos(prevAngle) * radius;
+      const prevY = y + sin(prevAngle) * radius;
+      pg.line(px, py, prevX, prevY);
+    }
+  }
+  
+  // Draw center details
+  pg.fill(params.invertColors ? params.borderColor : params.canvasColor);
+  pg.ellipse(x, y, size * 0.15, size * 0.15);
+  
+  // Draw small decorative elements
+  for (let i = 0; i < 4; i++) {
+    const angle = (i * PI/2);
+    const radius = size * 0.2;
+    const px = x + cos(angle) * radius;
+    const py = y + sin(angle) * radius;
+    pg.ellipse(px, py, size * 0.1, size * 0.1);
+  }
+}
+
+function drawVintageScrollToBuffer(x, y, size) {
+  if (!vintagePNG) return;
+  
+  // Calculate the size to maintain aspect ratio
+  const imgAspect = vintagePNG.width / vintagePNG.height;
+  let drawWidth = size;
+  let drawHeight = size / imgAspect;
+  
+  if (drawHeight > size) {
+    drawHeight = size;
+    drawWidth = size * imgAspect;
+  }
+  
+  // Center the image
+  const xOffset = -drawWidth / 2;
+  const yOffset = -drawHeight / 2;
+  
+  // Use the current color scheme
+  pg.tint(params.invertColors ? params.canvasColor : params.borderColor);
+  
+  // Draw the image
+  pg.image(vintagePNG, x + xOffset, y + yOffset, drawWidth, drawHeight);
+  
+  // Reset tint
+  pg.noTint();
 }
 
 function generateDistortion() {
