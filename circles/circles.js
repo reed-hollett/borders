@@ -64,13 +64,20 @@ let needsRedraw = true;
 let animationTime = 0;
 let scrollOffset = 0;
 
+let pg; // Graphics buffer
+
 function setup() {
   // Randomize parameters
   randomizeParameters();
   
   // Create canvas with the selected aspect ratio
   updateCanvasDimensions();
-  let canvas = createCanvas(canvasWidth, canvasHeight);
+  let canvas = createCanvas(canvasWidth, canvasHeight); // Remove WEBGL
+  
+  // Create a graphics buffer at 2x resolution for sharper rendering
+  pg = createGraphics(canvasWidth * 2, canvasHeight * 2);
+  pg.pixelDensity(2);
+  pg.noSmooth();
   
   // Center the canvas in the window
   let x = (windowWidth - canvasWidth) / 2;
@@ -288,15 +295,276 @@ function draw() {
     let bgColor = params.invertColors ? params.borderColor : params.canvasColor;
     let fgColor = params.invertColors ? params.canvasColor : params.borderColor;
     
-    // Draw canvas background
-    background(bgColor);
+    // Draw to the high-resolution buffer
+    pg.background(bgColor);
+    pg.fill(fgColor);
+    drawBorderToBuffer();
     
-    // Draw border with foreground color
-    fill(fgColor);
-    drawBorder();
+    // Draw the buffer to the canvas
+    background(bgColor);
+    imageMode(CORNER);
+    image(pg, 0, 0, width, height); // Fixed coordinates
     
     needsRedraw = false;
   }
+}
+
+function drawBorderToBuffer() {
+  // Modified version of drawBorder that draws to the buffer
+  pg.noStroke();
+  
+  // Scale everything by 2 for the higher resolution
+  const scale = 2;
+  
+  // Draw multiple border layers if specified
+  for (let layer = 0; layer < params.borderLayers; layer++) {
+    // Calculate the offset for this layer
+    const layerOffset = layer * (params.elementSize + params.elementSpacing);
+    const borderPos = (params.borderWidth + layerOffset) * scale;
+    
+    // Calculate the perimeter of the canvas
+    const perimeter = 2 * (canvasWidth + canvasHeight) * scale;
+    // Estimate number of elements based on size and spacing
+    const totalSpacing = (params.elementSize + params.elementSpacing) * scale;
+    const elementCount = Math.ceil(perimeter / totalSpacing);
+    
+    let elementIndex = 0;
+    
+    // Apply scrolling offset if animation is enabled
+    let offset = params.animate ? (scrollOffset % totalSpacing) : 0;
+    
+    // Top edge - scrolling right
+    for (let x = borderPos - offset; x <= canvasWidth * scale - borderPos; x += totalSpacing) {
+      if (elementIndex >= elementCount) break;
+      
+      drawBorderElementToBuffer(Math.floor(x), Math.floor(borderPos), Math.floor(params.elementSize * scale), 'top');
+      elementIndex++;
+    }
+    
+    // Right edge - scrolling down
+    for (let y = borderPos - offset; y <= canvasHeight * scale - borderPos; y += totalSpacing) {
+      if (elementIndex >= elementCount) break;
+      
+      drawBorderElementToBuffer(Math.floor(canvasWidth * scale - borderPos), Math.floor(y), Math.floor(params.elementSize * scale), 'right');
+      elementIndex++;
+    }
+    
+    // Bottom edge - scrolling left
+    for (let x = canvasWidth * scale - borderPos + offset; x >= borderPos; x -= totalSpacing) {
+      if (elementIndex >= elementCount) break;
+      
+      drawBorderElementToBuffer(Math.floor(x), Math.floor(canvasHeight * scale - borderPos), Math.floor(params.elementSize * scale), 'bottom');
+      elementIndex++;
+    }
+    
+    // Left edge - scrolling up
+    for (let y = canvasHeight * scale - borderPos + offset; y >= borderPos; y -= totalSpacing) {
+      if (elementIndex >= elementCount) break;
+      
+      drawBorderElementToBuffer(Math.floor(borderPos), Math.floor(y), Math.floor(params.elementSize * scale), 'left');
+      elementIndex++;
+    }
+  }
+}
+
+function drawBorderElementToBuffer(x, y, size, edge) {
+  // Ensure all coordinates are integers for crisp rendering
+  x = Math.floor(x);
+  y = Math.floor(y);
+  size = Math.floor(size);
+  
+  pg.push();
+  pg.translate(x, y);
+  
+  // Remove the size variation for animation
+  if (params.animate) {
+    // Just apply a gentle rotation based on time for subtle movement
+    let oscillation = sin(animationTime * 0.5) * 0.1;
+    pg.rotate(oscillation);
+  }
+  
+  // Rotate based on edge
+  if (edge === 'right') {
+    pg.rotate(PI/2);
+  } else if (edge === 'bottom') {
+    pg.rotate(PI);
+  } else if (edge === 'left') {
+    pg.rotate(3*PI/2);
+  }
+  
+  // Use selected border style
+  switch (params.borderStyle) {
+    case 'Fleur de Lis':
+      drawFleurDeLisToBuffer(0, 0, size);
+      break;
+    case 'Circles':
+      drawConcentricToBuffer(0, 0, size);
+      break;
+    case 'Flowers':
+      drawFlowerToBuffer(0, 0, size);
+      break;
+    case 'Spirals':
+      drawSpiralToBuffer(0, 0, size);
+      break;
+    case 'Ornate':
+      drawOrnateToBuffer(0, 0, size);
+      break;
+    case 'Leaves':
+      drawLeafToBuffer(0, 0, size);
+      break;
+    case 'Diamonds':
+      drawDiamondToBuffer(0, 0, size);
+      break;
+    case 'Scrolls':
+      drawScrollToBuffer(0, 0, size);
+      break;
+  }
+  
+  pg.pop();
+}
+
+function drawFleurDeLisToBuffer(x, y, size) {
+  // Fleur de lis inspired by the catalog
+  pg.noStroke();
+  
+  // Base
+  pg.ellipse(x, y + size/3, size/3, size/3);
+  
+  // Center petal
+  pg.beginShape();
+  pg.vertex(x, y - size/2);
+  pg.bezierVertex(x + size/4, y - size/4, x + size/4, y, x, y + size/4);
+  pg.bezierVertex(x - size/4, y, x - size/4, y - size/4, x, y - size/2);
+  pg.endShape(CLOSE);
+  
+  // Side petals
+  pg.beginShape();
+  pg.vertex(x - size/3, y);
+  pg.bezierVertex(x - size/5, y - size/5, x - size/8, y - size/3, x, y - size/6);
+  pg.bezierVertex(x + size/8, y - size/3, x + size/5, y - size/5, x + size/3, y);
+  pg.bezierVertex(x + size/5, y + size/5, x, y + size/3, x - size/5, y + size/5);
+  pg.endShape(CLOSE);
+}
+
+function drawConcentricToBuffer(x, y, size) {
+  // Concentric circles inspired by the catalog
+  pg.noStroke();
+  pg.ellipse(x, y, size, size);
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  pg.ellipse(x, y, size * 0.7, size * 0.7);
+  pg.fill(params.invertColors ? params.borderColor : params.canvasColor);
+  pg.ellipse(x, y, size * 0.4, size * 0.4);
+}
+
+function drawFlowerToBuffer(x, y, size) {
+  // Flower pattern inspired by the catalog
+  pg.noStroke();
+  
+  // Petals
+  for (let i = 0; i < 5; i++) {
+    pg.push();
+    pg.translate(x, y);
+    pg.rotate(i * TWO_PI / 5);
+    pg.ellipse(0, -size/3, size/3, size/2);
+    pg.pop();
+  }
+  
+  // Center
+  pg.ellipse(x, y, size/3, size/3);
+}
+
+function drawSpiralToBuffer(x, y, size) {
+  // Spiral pattern inspired by the catalog
+  pg.noStroke();
+  
+  // Outer circle
+  pg.ellipse(x, y, size, size);
+  
+  // Inner spiral
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  pg.beginShape();
+  for (let a = 0; a < TWO_PI * 2; a += 0.1) {
+    let r = size/3 * (1 - a/(TWO_PI * 2));
+    let sx = x + r * cos(a);
+    let sy = y + r * sin(a);
+    pg.vertex(sx, sy);
+  }
+  pg.endShape(CLOSE);
+}
+
+function drawOrnateToBuffer(x, y, size) {
+  // Ornate pattern inspired by the catalog
+  pg.noStroke();
+  
+  // Main shape
+  pg.ellipse(x, y, size, size);
+  
+  // Decorative elements
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  for (let i = 0; i < 8; i++) {
+    pg.push();
+    pg.translate(x, y);
+    pg.rotate(i * PI/4);
+    pg.ellipse(0, -size/2, size/4, size/4);
+    pg.pop();
+  }
+}
+
+function drawLeafToBuffer(x, y, size) {
+  // Leaf pattern inspired by the catalog
+  pg.noStroke();
+  
+  // Leaf shape
+  pg.beginShape();
+  pg.vertex(x, y - size/2);
+  pg.bezierVertex(x + size/3, y - size/4, x + size/3, y + size/4, x, y + size/2);
+  pg.bezierVertex(x - size/3, y + size/4, x - size/3, y - size/4, x, y - size/2);
+  pg.endShape(CLOSE);
+  
+  // Stem
+  pg.rect(x - size/20, y - size/2, size/10, size);
+}
+
+function drawDiamondToBuffer(x, y, size) {
+  // Diamond pattern inspired by the catalog
+  pg.noStroke();
+  
+  // Diamond shape
+  pg.quad(
+    x, y - size/2,
+    x + size/2, y,
+    x, y + size/2,
+    x - size/2, y
+  );
+  
+  // Inner diamond
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  pg.quad(
+    x, y - size/4,
+    x + size/4, y,
+    x, y + size/4,
+    x - size/4, y
+  );
+}
+
+function drawScrollToBuffer(x, y, size) {
+  // Scroll pattern inspired by the catalog
+  pg.noStroke();
+  
+  // Main scroll
+  pg.beginShape();
+  pg.vertex(x - size/2, y);
+  pg.bezierVertex(x - size/4, y - size/3, x + size/4, y - size/3, x + size/2, y);
+  pg.bezierVertex(x + size/4, y + size/3, x - size/4, y + size/3, x - size/2, y);
+  pg.endShape(CLOSE);
+  
+  // Inner detail
+  pg.fill(params.invertColors ? params.canvasColor : params.borderColor);
+  pg.beginShape();
+  pg.vertex(x - size/4, y);
+  pg.bezierVertex(x - size/8, y - size/6, x + size/8, y - size/6, x + size/4, y);
+  pg.bezierVertex(x + size/8, y + size/6, x - size/8, y + size/6, x - size/4, y);
+  pg.endShape(CLOSE);
 }
 
 function generateDistortion() {
@@ -313,261 +581,6 @@ function generateDistortion() {
     distortionMap[i] = map(random(100), 0, 100, -threshold/2, threshold/2);
   }
   return distortionMap;
-}
-
-function drawBorder() {
-  // No need to set fill color here as it's set in the draw function
-  noStroke();
-  
-  // Draw multiple border layers if specified
-  for (let layer = 0; layer < params.borderLayers; layer++) {
-    // Calculate the offset for this layer
-    const layerOffset = layer * (params.elementSize + params.elementSpacing);
-    const borderPos = params.borderWidth + layerOffset;
-    
-    // Calculate the perimeter of the canvas
-    const perimeter = 2 * (canvasWidth + canvasHeight);
-    // Estimate number of elements based on size and spacing
-    const totalSpacing = params.elementSize + params.elementSpacing;
-    const elementCount = Math.ceil(perimeter / totalSpacing);
-    
-    let elementIndex = 0;
-    
-    // Apply scrolling offset if animation is enabled
-    let offset = params.animate ? (scrollOffset % totalSpacing) : 0;
-    
-    // Top edge - scrolling right
-    for (let x = borderPos - offset; x <= canvasWidth - borderPos; x += totalSpacing) {
-      if (elementIndex >= elementCount) break;
-      
-      drawBorderElement(Math.floor(x), Math.floor(borderPos), Math.floor(params.elementSize), 'top');
-      elementIndex++;
-    }
-    
-    // Right edge - scrolling down
-    for (let y = borderPos - offset; y <= canvasHeight - borderPos; y += totalSpacing) {
-      if (elementIndex >= elementCount) break;
-      
-      drawBorderElement(Math.floor(canvasWidth - borderPos), Math.floor(y), Math.floor(params.elementSize), 'right');
-      elementIndex++;
-    }
-    
-    // Bottom edge - scrolling left
-    for (let x = canvasWidth - borderPos + offset; x >= borderPos; x -= totalSpacing) {
-      if (elementIndex >= elementCount) break;
-      
-      drawBorderElement(Math.floor(x), Math.floor(canvasHeight - borderPos), Math.floor(params.elementSize), 'bottom');
-      elementIndex++;
-    }
-    
-    // Left edge - scrolling up
-    for (let y = canvasHeight - borderPos + offset; y >= borderPos; y -= totalSpacing) {
-      if (elementIndex >= elementCount) break;
-      
-      drawBorderElement(Math.floor(borderPos), Math.floor(y), Math.floor(params.elementSize), 'left');
-      elementIndex++;
-    }
-  }
-}
-
-function drawBorderElement(x, y, size, edge) {
-  // Ensure all coordinates are integers for crisp rendering
-  x = Math.floor(x);
-  y = Math.floor(y);
-  size = Math.floor(size);
-  
-  push();
-  translate(x, y);
-  
-  // Remove the size variation for animation
-  if (params.animate) {
-    // Just apply a gentle rotation based on time for subtle movement
-    let oscillation = sin(animationTime * 0.5) * 0.1;
-    rotate(oscillation);
-  }
-  
-  // Rotate based on edge
-  if (edge === 'right') {
-    rotate(PI/2);
-  } else if (edge === 'bottom') {
-    rotate(PI);
-  } else if (edge === 'left') {
-    rotate(3*PI/2);
-  }
-  
-  // Use selected border style
-  switch (params.borderStyle) {
-    case 'Fleur de Lis':
-      drawFleurDeLis(0, 0, size);
-      break;
-    case 'Circles':
-      drawConcentric(0, 0, size);
-      break;
-    case 'Flowers':
-      drawFlower(0, 0, size);
-      break;
-    case 'Spirals':
-      drawSpiral(0, 0, size);
-      break;
-    case 'Ornate':
-      drawOrnate(0, 0, size);
-      break;
-    case 'Leaves':
-      drawLeaf(0, 0, size);
-      break;
-    case 'Diamonds':
-      drawDiamond(0, 0, size);
-      break;
-    case 'Scrolls':
-      drawScroll(0, 0, size);
-      break;
-  }
-  
-  pop();
-}
-
-function drawFleurDeLis(x, y, size) {
-  // Fleur de lis inspired by the catalog
-  noStroke();
-  
-  // Base
-  ellipse(x, y + size/3, size/3, size/3);
-  
-  // Center petal
-  beginShape();
-  vertex(x, y - size/2);
-  bezierVertex(x + size/4, y - size/4, x + size/4, y, x, y + size/4);
-  bezierVertex(x - size/4, y, x - size/4, y - size/4, x, y - size/2);
-  endShape(CLOSE);
-  
-  // Side petals
-  beginShape();
-  vertex(x - size/3, y);
-  bezierVertex(x - size/5, y - size/5, x - size/8, y - size/3, x, y - size/6);
-  bezierVertex(x + size/8, y - size/3, x + size/5, y - size/5, x + size/3, y);
-  bezierVertex(x + size/5, y + size/5, x, y + size/3, x - size/5, y + size/5);
-  endShape(CLOSE);
-}
-
-function drawConcentric(x, y, size) {
-  // Concentric circles inspired by the catalog
-  noStroke();
-  ellipse(x, y, size, size);
-  fill(params.invertColors ? params.canvasColor : params.borderColor);
-  ellipse(x, y, size * 0.7, size * 0.7);
-  fill(params.invertColors ? params.borderColor : params.canvasColor);
-  ellipse(x, y, size * 0.4, size * 0.4);
-}
-
-function drawFlower(x, y, size) {
-  // Flower pattern inspired by the catalog
-  noStroke();
-  
-  // Petals
-  for (let i = 0; i < 5; i++) {
-    push();
-    translate(x, y);
-    rotate(i * TWO_PI / 5);
-    ellipse(0, -size/3, size/3, size/2);
-    pop();
-  }
-  
-  // Center
-  ellipse(x, y, size/3, size/3);
-}
-
-function drawSpiral(x, y, size) {
-  // Spiral pattern inspired by the catalog
-  noStroke();
-  
-  // Outer circle
-  ellipse(x, y, size, size);
-  
-  // Inner spiral
-  fill(params.invertColors ? params.canvasColor : params.borderColor);
-  beginShape();
-  for (let a = 0; a < TWO_PI * 2; a += 0.1) {
-    let r = size/3 * (1 - a/(TWO_PI * 2));
-    let sx = x + r * cos(a);
-    let sy = y + r * sin(a);
-    vertex(sx, sy);
-  }
-  endShape(CLOSE);
-}
-
-function drawOrnate(x, y, size) {
-  // Ornate pattern inspired by the catalog
-  noStroke();
-  
-  // Main shape
-  ellipse(x, y, size, size);
-  
-  // Decorative elements
-  fill(params.invertColors ? params.canvasColor : params.borderColor);
-  for (let i = 0; i < 8; i++) {
-    push();
-    translate(x, y);
-    rotate(i * PI/4);
-    ellipse(0, -size/2, size/4, size/4);
-    pop();
-  }
-}
-
-function drawLeaf(x, y, size) {
-  // Leaf pattern inspired by the catalog
-  noStroke();
-  
-  // Leaf shape
-  beginShape();
-  vertex(x, y - size/2);
-  bezierVertex(x + size/3, y - size/4, x + size/3, y + size/4, x, y + size/2);
-  bezierVertex(x - size/3, y + size/4, x - size/3, y - size/4, x, y - size/2);
-  endShape(CLOSE);
-  
-  // Stem
-  rect(x - size/20, y - size/2, size/10, size);
-}
-
-function drawDiamond(x, y, size) {
-  // Diamond pattern inspired by the catalog
-  noStroke();
-  
-  // Diamond shape
-  quad(
-    x, y - size/2,
-    x + size/2, y,
-    x, y + size/2,
-    x - size/2, y
-  );
-  
-  // Inner diamond
-  fill(params.invertColors ? params.canvasColor : params.borderColor);
-  quad(
-    x, y - size/4,
-    x + size/4, y,
-    x, y + size/4,
-    x - size/4, y
-  );
-}
-
-function drawScroll(x, y, size) {
-  // Scroll pattern inspired by the catalog
-  noStroke();
-  
-  // Main scroll
-  beginShape();
-  vertex(x - size/2, y);
-  bezierVertex(x - size/4, y - size/3, x + size/4, y - size/3, x + size/2, y);
-  bezierVertex(x + size/4, y + size/3, x - size/4, y + size/3, x - size/2, y);
-  endShape(CLOSE);
-  
-  // Inner detail
-  fill(params.invertColors ? params.canvasColor : params.borderColor);
-  beginShape();
-  vertex(x - size/4, y);
-  bezierVertex(x - size/8, y - size/6, x + size/8, y - size/6, x + size/4, y);
-  bezierVertex(x + size/8, y + size/6, x - size/8, y + size/6, x - size/4, y);
-  endShape(CLOSE);
 }
 
 function windowResized() {
