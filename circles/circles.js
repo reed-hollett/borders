@@ -26,9 +26,11 @@ let foregroundColors = [
 ];
 
 let vintagePNG;
+let shape13PNG;
 
 function preload() {
   vintagePNG = loadImage('../shapes/vintage-scroll.png');
+  shape13PNG = loadImage('../shapes/Shape-13.png');
 }
 
 let params = {
@@ -49,7 +51,8 @@ let params = {
     'Scrolls',
     'Repeating Shape',
     'Vintage Border',
-    'Vintage Scroll'
+    'Vintage Scroll',
+    'Shape 13'
   ],
   elementSize: 15,
   elementSpacing: 5,
@@ -135,7 +138,7 @@ function setup() {
       redraw();
     });
     
-  gui.add(params, 'elementSize', 5, 40, 1)
+  gui.add(params, 'elementSize', 5, 100, 1)
     .name('Element Size')
     .onChange(() => {
       needsRedraw = true;
@@ -342,34 +345,40 @@ function drawBorderToBuffer() {
     // Apply scrolling offset if animation is enabled
     let offset = params.animate ? (scrollOffset % totalSpacing) : 0;
     
+    // Calculate the number of elements for each edge
+    const topElements = Math.ceil((canvasWidth * scale - 2 * borderPos) / totalSpacing);
+    const rightElements = Math.ceil((canvasHeight * scale - 2 * borderPos) / totalSpacing);
+    const bottomElements = Math.ceil((canvasWidth * scale - 2 * borderPos) / totalSpacing);
+    const leftElements = Math.ceil((canvasHeight * scale - 2 * borderPos) / totalSpacing);
+    
     // Top edge - scrolling right
-    for (let x = borderPos - offset; x <= canvasWidth * scale - borderPos; x += totalSpacing) {
+    for (let i = 0; i < topElements; i++) {
       if (elementIndex >= elementCount) break;
-      
+      const x = borderPos + (i * totalSpacing) - offset;
       drawBorderElementToBuffer(Math.floor(x), Math.floor(borderPos), Math.floor(params.elementSize * scale), 'top');
       elementIndex++;
     }
     
     // Right edge - scrolling down
-    for (let y = borderPos - offset; y <= canvasHeight * scale - borderPos; y += totalSpacing) {
+    for (let i = 0; i < rightElements; i++) {
       if (elementIndex >= elementCount) break;
-      
+      const y = borderPos + (i * totalSpacing) - offset;
       drawBorderElementToBuffer(Math.floor(canvasWidth * scale - borderPos), Math.floor(y), Math.floor(params.elementSize * scale), 'right');
       elementIndex++;
     }
     
     // Bottom edge - scrolling left
-    for (let x = canvasWidth * scale - borderPos + offset; x >= borderPos; x -= totalSpacing) {
+    for (let i = 0; i < bottomElements; i++) {
       if (elementIndex >= elementCount) break;
-      
+      const x = canvasWidth * scale - borderPos - (i * totalSpacing) + offset;
       drawBorderElementToBuffer(Math.floor(x), Math.floor(canvasHeight * scale - borderPos), Math.floor(params.elementSize * scale), 'bottom');
       elementIndex++;
     }
     
     // Left edge - scrolling up
-    for (let y = canvasHeight * scale - borderPos + offset; y >= borderPos; y -= totalSpacing) {
+    for (let i = 0; i < leftElements; i++) {
       if (elementIndex >= elementCount) break;
-      
+      const y = canvasHeight * scale - borderPos - (i * totalSpacing) + offset;
       drawBorderElementToBuffer(Math.floor(borderPos), Math.floor(y), Math.floor(params.elementSize * scale), 'left');
       elementIndex++;
     }
@@ -435,6 +444,9 @@ function drawBorderElementToBuffer(x, y, size, edge) {
       break;
     case 'Vintage Scroll':
       drawVintageScrollToBuffer(0, 0, size);
+      break;
+    case 'Shape 13':
+      drawShape13ToBuffer(0, 0, size);
       break;
   }
   
@@ -760,6 +772,33 @@ function drawVintageScrollToBuffer(x, y, size) {
   
   // Draw the image
   pg.image(vintagePNG, x + xOffset, y + yOffset, drawWidth, drawHeight);
+  
+  // Reset tint
+  pg.noTint();
+}
+
+function drawShape13ToBuffer(x, y, size) {
+  if (!shape13PNG) return;
+  
+  // Calculate the size to maintain aspect ratio
+  const imgAspect = shape13PNG.width / shape13PNG.height;
+  let drawWidth = size;
+  let drawHeight = size / imgAspect;
+  
+  if (drawHeight > size) {
+    drawHeight = size;
+    drawWidth = size * imgAspect;
+  }
+  
+  // Center the image
+  const xOffset = -drawWidth / 2;
+  const yOffset = -drawHeight / 2;
+  
+  // Use the current color scheme
+  pg.tint(params.invertColors ? params.canvasColor : params.borderColor);
+  
+  // Draw the image
+  pg.image(shape13PNG, x + xOffset, y + yOffset, drawWidth, drawHeight);
   
   // Reset tint
   pg.noTint();
