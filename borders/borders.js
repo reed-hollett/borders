@@ -28,16 +28,12 @@ let foregroundColors = [
 let vintagePNG;
 let shape13PNG;
 
-function preload() {
-  vintagePNG = loadImage('../shapes/vintage-scroll.png');
-  shape13PNG = loadImage('../shapes/Shape-13.png');
-}
-
+// Remove the window-level shared GUI code
 let params = {
   aspectRatio: "16:9 (Widescreen)",
   flipOrientation: true,
-  canvasColor: '#F5F2E3', // Default to vintage paper
-  borderColor: '#000000', // Default to black
+  canvasColor: '#F5F2E3',
+  borderColor: '#000000',
   borderWidth: 30,
   borderStyle: 'Fleur de Lis',
   borderStyles: [
@@ -54,11 +50,14 @@ let params = {
     'Vintage Scroll',
     'Shape 13'
   ],
-  elementSize: 15,
-  elementSpacing: 5,
-  borderLayers: 1,
+  elementSize: 20,
+  elementSpacing: 20,
+  borderLayers: 3,
   invertColors: false,
   animate: false,
+  animateSize: false,
+  animateSpacing: false,
+  animateLayers: false,
   export: function() {
     saveCanvas('vintage-border', 'png');
   }
@@ -77,6 +76,10 @@ let animationTime = 0;
 let scrollOffset = 0;
 
 let pg; // Graphics buffer
+
+// Add these variables at the top with other declarations
+let startTime;
+const animationDuration = 2000; // 2 seconds in milliseconds
 
 function setup() {
   // Randomize parameters
@@ -100,10 +103,14 @@ function setup() {
   pixelDensity(1);
   noSmooth();
   
+  // Create a new local GUI instance
   gui = new lil.GUI();
   
-  // Aspect ratio controls
-  gui.add(params, 'aspectRatio', Object.keys(aspectRatios))
+  // Create a single folder for all controls
+  const borderControls = gui.addFolder('Border Controls');
+  
+  // Add all controls to this folder
+  borderControls.add(params, 'aspectRatio', Object.keys(aspectRatios))
     .name('Aspect Ratio')
     .onChange(() => {
       updateCanvasDimensions();
@@ -113,7 +120,7 @@ function setup() {
       redraw();
     });
     
-  gui.add(params, 'flipOrientation')
+  borderControls.add(params, 'flipOrientation')
     .name('Flip Orientation')
     .onChange(() => {
       updateCanvasDimensions();
@@ -124,74 +131,105 @@ function setup() {
     });
   
   // Border controls
-  gui.add(params, 'borderWidth', 5, 100, 1)
+  borderControls.add(params, 'borderWidth', 5, 100, 1)
     .name('Border Width')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
     
-  const borderStyleController = gui.add(params, 'borderStyle', params.borderStyles)
+  borderControls.add(params, 'borderStyle', params.borderStyles)
     .name('Border Style')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
-    
-  gui.add(params, 'elementSize', 5, 100, 1)
+
+  // Element Size control with animation
+  borderControls.add(params, 'elementSize', 10, 120, 2)
     .name('Element Size')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
-    
-  gui.add(params, 'elementSpacing', 0, 20, 1)
+  borderControls.add(params, 'animateSize')
+    .name('Animate Size')
+    .onChange(() => {
+      needsRedraw = true;
+      if (params.animateSize || params.animateSpacing || params.animateLayers) {
+        loop();
+      } else {
+        noLoop();
+      }
+    });
+
+  // Element Spacing control with animation
+  borderControls.add(params, 'elementSpacing', 10, 100)
     .name('Element Spacing')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
-  
-  gui.add(params, 'borderLayers', 1, 5, 1)
+  borderControls.add(params, 'animateSpacing')
+    .name('Animate Spacing')
+    .onChange(() => {
+      needsRedraw = true;
+      if (params.animateSize || params.animateSpacing || params.animateLayers) {
+        loop();
+      } else {
+        noLoop();
+      }
+    });
+
+  // Border Layers control with animation
+  borderControls.add(params, 'borderLayers', 1, 10, 1)
     .name('Border Layers')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
+  borderControls.add(params, 'animateLayers')
+    .name('Animate Layers')
+    .onChange(() => {
+      needsRedraw = true;
+      if (params.animateSize || params.animateSpacing || params.animateLayers) {
+        loop();
+      } else {
+        noLoop();
+      }
+    });
   
   // Color controls
-  gui.addColor(params, 'canvasColor')
+  borderControls.addColor(params, 'canvasColor')
     .name('Canvas Color')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
     
-  gui.addColor(params, 'borderColor')
+  borderControls.addColor(params, 'borderColor')
     .name('Border Color')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
     
-  gui.add(params, 'invertColors')
+  borderControls.add(params, 'invertColors')
     .name('Invert Colors')
     .onChange(() => {
       needsRedraw = true;
       redraw();
     });
     
-  gui.add(params, 'animate')
-    .name('Animate')
+  borderControls.add(params, 'animate')
+    .name('Scroll')
     .onChange(toggleAnimation);
     
   // Add the export button last
-  const exportController = gui.add(params, 'export').name('Export as PNG');
-  
-  // Create and insert spacer before the export button's container
-  const spacer = document.createElement('div');
-  spacer.style.height = '10px';
-  exportController.domElement.parentElement.insertBefore(spacer, exportController.domElement);
+  borderControls.add(params, 'export').name('Export as PNG');
+
+  // Open the folder by default
+  borderControls.open();
   
   // Set to only draw when needed
   noLoop();
@@ -203,6 +241,8 @@ function setup() {
   redraw();
 
   applyTheme(getCurrentTheme());
+
+  startTime = millis();
 }
 
 function randomizeParameters() {
@@ -269,6 +309,9 @@ function updateCanvasDimensions() {
     canvasWidth = Math.floor(maxHeight * (ratioWidth / ratioHeight));
   }
   
+  // Increase canvas height by 20%
+  canvasHeight = Math.floor(canvasHeight * 1.2);
+  
   // Ensure dimensions are integers for crisp rendering
   canvasWidth = Math.floor(canvasWidth);
   canvasHeight = Math.floor(canvasHeight);
@@ -290,8 +333,8 @@ function animationLoop(timestamp) {
     // Increment animation time
     animationTime += 0.05;
     
-    // Update scroll offset for scrolling animation
-    scrollOffset += 1;
+    // Update scroll offset for scrolling animation - increase this value to speed up scrolling
+    scrollOffset += 3; // Changed from 1 to 3 for faster scrolling
     
     lastDistortionUpdate = timestamp;
     needsRedraw = true;
@@ -302,7 +345,40 @@ function animationLoop(timestamp) {
 }
 
 function draw() {
-  if (needsRedraw || params.animate) {
+  // Handle animations
+  const currentTime = millis();
+  const elapsed = (currentTime - startTime) % animationDuration;
+  const progress = elapsed / animationDuration;
+  const sineProgress = (Math.sin(progress * Math.PI * 2) + 1) / 2; // Smooth oscillation
+
+  let needsUpdate = false;
+
+  // Animate element size
+  if (params.animateSize) {
+    const minSize = 10;
+    const maxSize = 120;
+    params.elementSize = minSize + (maxSize - minSize) * sineProgress;
+    needsUpdate = true;
+  }
+
+  // Animate element spacing
+  if (params.animateSpacing) {
+    const minSpacing = 10;
+    const maxSpacing = 100;
+    params.elementSpacing = minSpacing + (maxSpacing - minSpacing) * sineProgress;
+    needsUpdate = true;
+  }
+
+  // Animate border layers
+  if (params.animateLayers) {
+    const minLayers = 1;
+    const maxLayers = 10;
+    params.borderLayers = Math.round(minLayers + (maxLayers - minLayers) * sineProgress);
+    needsUpdate = true;
+  }
+
+  // Only redraw if we need to
+  if (needsUpdate || needsRedraw || params.animate) {
     // Get colors based on invert setting
     let bgColor = params.invertColors ? params.borderColor : params.canvasColor;
     let fgColor = params.invertColors ? params.canvasColor : params.borderColor;
@@ -315,7 +391,7 @@ function draw() {
     // Draw the buffer to the canvas
     background(bgColor);
     imageMode(CORNER);
-    image(pg, 0, 0, width, height); // Fixed coordinates
+    image(pg, 0, 0, width, height);
     
     needsRedraw = false;
   }
