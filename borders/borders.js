@@ -25,8 +25,20 @@ let foregroundColors = [
   '#3B3B3B'  // Charcoal
 ];
 
-let vintagePNG;
-let shape13PNG;
+// Add at the top with other declarations
+let boatPNG;
+let bullseyePNG;
+let chickenPNG;
+let cloverPNG;
+let fleurDeLisPNG;
+let fountainPNG;
+let frogPNG;
+let leafPNG;
+let poppyPNG;
+let ribbonPNG;
+let scrollPNG;
+let stampPNG;
+let wheelPNG;
 
 // Remove the window-level shared GUI code
 let params = {
@@ -35,20 +47,21 @@ let params = {
   canvasColor: '#F5F2E3',
   borderColor: '#000000',
   borderWidth: 30,
-  borderStyle: 'Fleur de Lis',
+  borderStyle: 'Boat',
   borderStyles: [
-    'Fleur de Lis',
-    'Circles',
-    'Flowers',
-    'Spirals',
-    'Ornate',
-    'Leaves',
-    'Diamonds',
-    'Scrolls',
-    'Repeating Shape',
-    'Vintage Border',
-    'Vintage Scroll',
-    'Shape 13'
+    'Boat',
+    'Bullseye',
+    'Chicken',
+    'Clover',
+    'Fleur-de-lis',
+    'Fountain',
+    'Frog',
+    'Leaf',
+    'Poppy',
+    'Ribbon',
+    'Scroll',
+    'Stamp',
+    'Wheel'
   ],
   elementSize: 20,
   elementSpacing: 20,
@@ -80,6 +93,24 @@ let pg; // Graphics buffer
 // Add these variables at the top with other declarations
 let startTime;
 const animationDuration = 2000; // 2 seconds in milliseconds
+
+// Move preload function to the top of the file, before setup
+function preload() {
+  // Load all shape images with the correct path (one level up from borders folder)
+  boatPNG = loadImage('../shapes/Boat.png');
+  bullseyePNG = loadImage('../shapes/Bullseye.png');
+  chickenPNG = loadImage('../shapes/Chicken.png');
+  cloverPNG = loadImage('../shapes/Clover.png');
+  fleurDeLisPNG = loadImage('../shapes/Fleur-de-lis.png');
+  fountainPNG = loadImage('../shapes/Fountain.png');
+  frogPNG = loadImage('../shapes/Frog.png');
+  leafPNG = loadImage('../shapes/Leaf.png');
+  poppyPNG = loadImage('../shapes/Poppy.png');
+  ribbonPNG = loadImage('../shapes/Ribbon.png');
+  scrollPNG = loadImage('../shapes/Scroll.png');
+  stampPNG = loadImage('../shapes/Stamp.png');
+  wheelPNG = loadImage('../shapes/Wheel.png');
+}
 
 function setup() {
   // Randomize parameters
@@ -488,41 +519,44 @@ function drawBorderElementToBuffer(x, y, size, edge) {
   
   // Use selected border style
   switch (params.borderStyle) {
-    case 'Fleur de Lis':
-      drawFleurDeLisToBuffer(0, 0, size);
+    case 'Boat':
+      drawShapeToBuffer(boatPNG, 0, 0, size);
       break;
-    case 'Circles':
-      drawConcentricToBuffer(0, 0, size);
+    case 'Bullseye':
+      drawShapeToBuffer(bullseyePNG, 0, 0, size);
       break;
-    case 'Flowers':
-      drawFlowerToBuffer(0, 0, size);
+    case 'Chicken':
+      drawShapeToBuffer(chickenPNG, 0, 0, size);
       break;
-    case 'Spirals':
-      drawSpiralToBuffer(0, 0, size);
+    case 'Clover':
+      drawShapeToBuffer(cloverPNG, 0, 0, size);
       break;
-    case 'Ornate':
-      drawOrnateToBuffer(0, 0, size);
+    case 'Fleur-de-lis':
+      drawShapeToBuffer(fleurDeLisPNG, 0, 0, size);
       break;
-    case 'Leaves':
-      drawLeafToBuffer(0, 0, size);
+    case 'Fountain':
+      drawShapeToBuffer(fountainPNG, 0, 0, size);
       break;
-    case 'Diamonds':
-      drawDiamondToBuffer(0, 0, size);
+    case 'Frog':
+      drawShapeToBuffer(frogPNG, 0, 0, size);
       break;
-    case 'Scrolls':
-      drawScrollToBuffer(0, 0, size);
+    case 'Leaf':
+      drawShapeToBuffer(leafPNG, 0, 0, size);
       break;
-    case 'Repeating Shape':
-      drawRepeatingShapeToBuffer(0, 0, size);
+    case 'Poppy':
+      drawShapeToBuffer(poppyPNG, 0, 0, size);
       break;
-    case 'Vintage Border':
-      drawVintageBorderToBuffer(0, 0, size);
+    case 'Ribbon':
+      drawShapeToBuffer(ribbonPNG, 0, 0, size);
       break;
-    case 'Vintage Scroll':
-      drawVintageScrollToBuffer(0, 0, size);
+    case 'Scroll':
+      drawShapeToBuffer(scrollPNG, 0, 0, size);
       break;
-    case 'Shape 13':
-      drawShape13ToBuffer(0, 0, size);
+    case 'Stamp':
+      drawShapeToBuffer(stampPNG, 0, 0, size);
+      break;
+    case 'Wheel':
+      drawShapeToBuffer(wheelPNG, 0, 0, size);
       break;
   }
   
@@ -875,6 +909,57 @@ function drawShape13ToBuffer(x, y, size) {
   
   // Draw the image
   pg.image(shape13PNG, x + xOffset, y + yOffset, drawWidth, drawHeight);
+  
+  // Reset tint
+  pg.noTint();
+}
+
+function drawShape14ToBuffer(x, y, size) {
+  if (!shape14PNG) return;
+  drawShapeToBuffer(shape14PNG, x, y, size);
+}
+
+function drawShape15ToBuffer(x, y, size) {
+  if (!shape15PNG) return;
+  drawShapeToBuffer(shape15PNG, x, y, size);
+}
+
+function drawShape16ToBuffer(x, y, size) {
+  if (!shape16PNG) return;
+  drawShapeToBuffer(shape16PNG, x, y, size);
+}
+
+function drawShape17ToBuffer(x, y, size) {
+  if (!shape17PNG) return;
+  drawShapeToBuffer(shape17PNG, x, y, size);
+}
+
+function drawShape18ToBuffer(x, y, size) {
+  if (!shape18PNG) return;
+  drawShapeToBuffer(shape18PNG, x, y, size);
+}
+
+// Helper function to draw shapes consistently
+function drawShapeToBuffer(shapePNG, x, y, size) {
+  // Calculate the size to maintain aspect ratio
+  const imgAspect = shapePNG.width / shapePNG.height;
+  let drawWidth = size;
+  let drawHeight = size / imgAspect;
+  
+  if (drawHeight > size) {
+    drawHeight = size;
+    drawWidth = size * imgAspect;
+  }
+  
+  // Center the image
+  const xOffset = -drawWidth / 2;
+  const yOffset = -drawHeight / 2;
+  
+  // Use the current color scheme
+  pg.tint(params.invertColors ? params.canvasColor : params.borderColor);
+  
+  // Draw the image
+  pg.image(shapePNG, x + xOffset, y + yOffset, drawWidth, drawHeight);
   
   // Reset tint
   pg.noTint();
